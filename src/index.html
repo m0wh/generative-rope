@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello 3D World</title>
+  <link rel="stylesheet" href="./style.scss">
+  <link rel="icon" type="image/png" href="./assets/favicon.png" />
+  <link rel="apple-touch-icon" sizes="64x64" href="./assets/favicon.png" />
+  <link rel="shortcut icon" type="image/png" href="./assets/favicon.png" />
+</head>
+<body>
+  <div class="ui">
+    <div id="ui"></div>
+
+    <p>Pot de peinture : <input type="color" id="fill-all"></p>
+    <p>
+      Fonction :
+      <select id="fill-func">
+        <option value="" disabled>Select a function</option>
+        <option value="random">Remplir aléatoirement</option>
+        <option value="euclidean">Séquences euclidiennes</option>
+      </select>
+      <button id="apply-function">OK</button>
+    </p>
+  </div>
+
+  <div id="view"></div>
+  
+  <script src="./main.ts"></script>
+</body>
+</html>

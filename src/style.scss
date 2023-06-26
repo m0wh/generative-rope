@@ -1,0 +1,50 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  display: flex;
+
+  .ui {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    input[type=color] {
+      height: 30px;
+      width: 30px;
+      border: none;
+      padding: 0;
+      border-radius: 50%;
+      overflow: hidden;
+      outline: none;
+      vertical-align: middle;
+
+      &::-webkit-color-swatch-wrapper { border: none; }
+      &::-webkit-color-swatch { border: none; }
+      &::-moz-color-swatch { border: none; }
+    }
+
+    #ui {
+      margin-bottom: 30px;
+      width: 500px;
+      height: 500px;
+      max-width: 50vw;
+      max-height: 50vw;
+      position: relative;
+
+      input[type=color] {
+        height: 10%;
+        width: 10%;
+
+        position: absolute;
+        left: calc((100% - 10%) * (1 + (var(--pos-x) * (1 - var(--rad) * 0.35))) / 2);
+        top: calc((100% - 10%) * (1 + (var(--pos-y) * (1 - var(--rad) * 0.35))) / 2);
+      }
+    }
+  }
+
+  #view {
+    width: 50%;
+  }
+}
