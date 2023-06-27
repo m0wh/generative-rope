@@ -63,6 +63,43 @@ function createSpoolButton (i, line, distFromCenter) {
   })
 }
 
+function createSpoolsLinks () {
+  const size = 500
+  const linksCanvas = document.createElement('canvas')
+  const ctx = linksCanvas.getContext('2d')
+  linksCanvas.width = size
+  linksCanvas.height = size
+
+  ctx.strokeStyle = '#777777'
+  ctx.setLineDash([])
+  ctx.beginPath()
+  for (let i = 0; i < state.wiresCount; i++) {
+    const radius = size / 2 * (i % 2 === 0 ? 0.7 : 1)
+    const pos = {
+      x: Math.sin(Math.PI * 2 / state.wiresCount * i) * radius + size / 2,
+      y: -Math.cos(Math.PI * 2 / state.wiresCount * i) * radius + size / 2
+    }
+    if (i === 0) { ctx.moveTo(pos.x, pos.y) } else { ctx.lineTo(pos.x, pos.y) }
+  }
+  ctx.closePath()
+  ctx.stroke()
+
+  ctx.setLineDash([5, 5])
+  ctx.beginPath()
+  for (let i = 0; i < state.wiresCount; i++) {
+    const radius = size / 2 * (i % 2 !== 0 ? 0.7 : 1)
+    const pos = {
+      x: Math.sin(Math.PI * 2 / state.wiresCount * i) * radius + size / 2,
+      y: -Math.cos(Math.PI * 2 / state.wiresCount * i) * radius + size / 2
+    }
+    if (i === 0) { ctx.moveTo(pos.x, pos.y) } else { ctx.lineTo(pos.x, pos.y) }
+  }
+  ctx.closePath()
+  ctx.stroke()
+
+  spoolsWrapper.style.backgroundImage = `url(${linksCanvas.toDataURL()})`
+}
+
 function updateColors () {
   draw([
     Array.from(spoolsWrapper.querySelectorAll('.spool')).filter(spoolEl => spoolEl.getAttribute('data-spoolname')[0] === 'A').map(spoolEl => spoolEl.getAttribute('data-color')),
@@ -141,6 +178,8 @@ export default function initUI () {
     createSpoolButton(i, 'A', i % 2 === 0 ? 1 : 0.7)
     createSpoolButton(i, 'B', i % 2 === 0 ? 0.7 : 1)
   }
+
+  createSpoolsLinks()
 
   popupsWrapper.addEventListener('click', e => {
     if (e.target === popupsWrapper) closeAllPopups()
