@@ -93,9 +93,15 @@ function openPalettePopup () {
     colorsEl.append(colorPicker)
 
     colorPicker.addEventListener('change', () => {
-      colors.palette[i] = colorPicker.value
-      colors.current = colorPicker.value
-      colorPicker.setAttribute('data-color', colorPicker.value)
+      if (colorPicker.value === '') {
+        colorPicker.parentElement.remove()
+        colors.palette.splice(i, 1)
+        openPalettePopup()
+      } else {
+        colors.palette[i] = colorPicker.value
+        colors.current = colorPicker.value
+        colorPicker.setAttribute('data-color', colorPicker.value)
+      }
       updateColorSelectors()
     })
   })
@@ -106,12 +112,24 @@ function openPalettePopup () {
     alpha: false,
     theme: 'pill',
     wrap: true,
+    clearButton: true,
+    clearLabel: 'Remove',
     defaultColor: '#eeeeee',
     swatches: colors.palette
   })
 
   popupsWrapper.style.display = 'flex'
   palettePopup.style.display = 'block'
+}
+
+function randomizeFromPalette () {
+  Array.from(spoolsWrapper.children).forEach((spool: HTMLButtonElement) => {
+    const color = colors.palette[Math.floor(random() * colors.palette.length)]
+    spool.setAttribute('data-color', color)
+    spool.style.backgroundColor = color
+    spool.style.borderColor = color
+  })
+  updateColors()
 }
 
 export default function initUI () {
@@ -130,9 +148,9 @@ export default function initUI () {
 
   Coloris.init()
 
-  document.getElementById('add-color-button').addEventListener('click', () => { openPalettePopup() })
+  document.getElementById('open-palette-popup').addEventListener('click', () => { openPalettePopup() })
+  document.getElementById('randomize').addEventListener('click', () => { randomizeFromPalette() })
 
-  console.log(document.querySelectorAll('button.palette-add'))
   document.querySelectorAll('button.palette-add').forEach(btn => {
     btn.addEventListener('click', () => {
       const color = '#' + ('000000' + Math.floor(random() * 0xffffff).toString(16)).slice(-6)
