@@ -1,7 +1,7 @@
 import { init } from './utils/three-helpers'
 import raf from './utils/raf'
 import fx from './utils/effects'
-import { CylinderGeometry, Mesh, CanvasTexture, MeshBasicMaterial, RepeatWrapping, Color } from 'three'
+import { CylinderGeometry, Mesh, CanvasTexture, MeshBasicMaterial, RepeatWrapping, Color, DoubleSide } from 'three'
 import { state } from './store'
 
 export default function createView (canvas) {
@@ -20,8 +20,8 @@ export default function createView (canvas) {
   texture.repeat.setY(ropeLength / (0.2 * Math.PI))
 
   const geo = new CylinderGeometry(0.1, 0.1, ropeLength, 14)
-  const capMat = new MeshBasicMaterial({ color: state.colors[0][0] })
-  const sideMat = new MeshBasicMaterial({ map: texture })
+  const capMat = new MeshBasicMaterial({ color: state.colors[0][0], side: DoubleSide })
+  const sideMat = new MeshBasicMaterial({ map: texture, side: DoubleSide })
   const rope = new Mesh(geo, [sideMat, capMat, capMat])
   rope.rotateZ(Math.PI / 4)
   scene.add(rope)
