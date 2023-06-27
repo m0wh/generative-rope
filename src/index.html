@@ -11,6 +11,17 @@
 </head>
 <body>
   <div class="ui">
+    <h1><b>Malo de Widerspach /</b> Rope generator</h1>
+
+    <div id="spools"></div>
+
+    <div class="color-select">
+      <span id="colorselect"></span>
+      <button id="add-color-button"></button>
+    </div>
+  </div>
+  
+  <!-- <div class="ui">
     <div id="ui"></div>
 
     <p>Pot de peinture : <input type="color" id="fill-all"></p>
@@ -23,10 +34,20 @@
       </select>
       <button id="apply-function">OK</button>
     </p>
-  </div>
+  </div> -->
 
   <div id="view"></div>
-  
+
+  <div class="popups" style="display: none;">
+    <div class="popup" id="palette-popup">
+      <h2>Palette</h2>
+
+      <div class="colors">
+        <button class="palette-add"></button>
+      </div>
+    </div>
+  </div>
+
   <script src="./main.ts"></script>
 </body>
 </html>
