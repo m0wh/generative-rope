@@ -60,6 +60,8 @@ body {
     }
 
     .color-select {
+      font-size: 0;
+
       button {
         background-color: #eee;
         width: 24px;
@@ -74,10 +76,18 @@ body {
         border-radius: 25%;
         margin-left: 8px;
         color: #777;
+
+        &:hover { background-color: #ddd; }
+      }
+
+      > span {
+        margin-left: 8px;
       }
 
       span > button {
+        font-size: 1rem;
         border-radius: 0;
+        margin: 0;
 
         &:first-of-type {
           border-top-left-radius: 25%;

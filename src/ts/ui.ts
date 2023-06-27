@@ -5,6 +5,10 @@ import { draw } from './canvas'
 import '@melloware/coloris/dist/coloris.css'
 import * as Coloris from '@melloware/coloris'
 
+// http://localhost:1234/#palette=f83838,f83838,f83838,f83838,f83838,f83838,f83838,f83838,f83838,f83838,f83838,f83838,f83838,f83838,fff1f1,fff1f1,fff1f1,fff1f1,fff1f1,fff1f1,fff1f1,fff1f1,fff1f1,fff1f1,fff1f1,fff1f1,fff1f1,fff1f1,00a6e8,00a6e8,00a6e8,fffdb5,fffdb5,fffdb5,fffdb5,fffdb5
+
+const data = Object.fromEntries(window.location.hash.replace('#', '').split('&').map(q => q.split('=')).filter(([a, b]) => a !== ''))
+
 const random = randomGenerator(state.seed)
 
 const colorSelectorWrapper = document.getElementById('colorselect')
@@ -13,8 +17,10 @@ const spoolsWrapper = document.getElementById('spools')
 const allPalettes = tome.getAll()
 const p = allPalettes[Math.floor(random() * allPalettes.length)]
 
+console.log(data.palette)
+
 const colors = {
-  palette: [...new Set([p.background, ...p.colors, p.stroke].filter(c => typeof c === 'string'))],
+  palette: data.palette ? data.palette.split(',').map(c => '#' + c) : [...new Set([p.background, ...p.colors, p.stroke].filter(c => typeof c === 'string'))],
   current: undefined
 }
 colors.current = colors.palette[Math.floor(random() * colors.palette.length)]
@@ -44,13 +50,13 @@ function updateColorSelectors () {
 }
 
 // creates a spool button
-function createSpoolButton (i, line, distFromCenter) {
+function createSpoolButton (i, line, distFromCenter, color) {
   const spool = document.createElement('button')
   spool.classList.add('spool')
-  spool.setAttribute('data-color', colors.current)
+  spool.setAttribute('data-color', color)
   spool.setAttribute('data-spoolname', line + i.toString())
-  spool.style.backgroundColor = colors.current
-  spool.style.borderColor = colors.current
+  spool.style.backgroundColor = color
+  spool.style.borderColor = color
   spool.style.top = -Math.cos(Math.PI * 2 / state.wiresCount * i) * distFromCenter * 50 + 50 + '%'
   spool.style.left = Math.sin(Math.PI * 2 / state.wiresCount * i) * distFromCenter * 50 + 50 + '%'
   spoolsWrapper.append(spool)
@@ -60,6 +66,7 @@ function createSpoolButton (i, line, distFromCenter) {
     spool.style.backgroundColor = colors.current
     spool.style.borderColor = colors.current
     updateColors()
+    setURL()
   })
 }
 
@@ -98,6 +105,15 @@ function createSpoolsLinks () {
   ctx.stroke()
 
   spoolsWrapper.style.backgroundImage = `url(${linksCanvas.toDataURL()})`
+}
+
+function setURL () {
+  window.location.hash = [
+    'palette=' + colors.palette.map(c => c.replace('#', '')).join(','),
+    'spools=' + Array.from(spoolsWrapper.querySelectorAll('.spool'))
+      .map(spoolEl => spoolEl.getAttribute('data-color').replace('#', ''))
+      .join(',')
+  ].join('&')
 }
 
 function updateColors () {
@@ -167,6 +183,70 @@ function randomizeFromPalette () {
     spool.style.borderColor = color
   })
   updateColors()
+  setURL()
+}
+
+function euclidFromPalette () {
+  function euclid (steps, pulses, rotation) {
+    const storedRhythm = []
+    let bucket = 0
+
+    for (let i = 0; i < steps; i++) {
+      bucket += pulses
+      storedRhythm.push(bucket >= steps)
+      if (bucket >= steps) bucket -= steps
+    }
+
+    return new Array(steps).fill(false).map((step, i) => storedRhythm[Math.abs((i + steps - (rotation + 1)) % steps)])
+  }
+
+  const colorA = colors.palette[Math.floor(random() * colors.palette.length)]
+  const colorB = colors.palette[Math.floor(random() * colors.palette.length)]
+
+  const colorC = colors.palette[Math.floor(random() * colors.palette.length)]
+  const colorD = colors.palette[Math.floor(random() * colors.palette.length)]
+
+  const values = [
+    euclid(state.wiresCount, Math.round(random() * state.wiresCount), Math.round(random() * state.wiresCount)).map(v => v ? colorA : colorB),
+    euclid(state.wiresCount, Math.round(random() * state.wiresCount), Math.round(random() * state.wiresCount)).map(v => v ? colorC : colorD)
+  ]
+
+  Array.from(spoolsWrapper.children).forEach((spool: HTMLButtonElement) => {
+    const name = spool.getAttribute('data-spoolname')
+    let color
+    if (name[0] === 'A') {
+      color = values[0].pop()
+    } else {
+      color = values[1].pop()
+    }
+    spool.setAttribute('data-color', color)
+    spool.style.backgroundColor = color
+    spool.style.borderColor = color
+  })
+
+  updateColors()
+  setURL()
+}
+
+function linesFromPalette () {
+  const colorA = colors.palette[Math.floor(random() * colors.palette.length)]
+  const colorB = colors.palette[Math.floor(random() * colors.palette.length)]
+
+  Array.from(spoolsWrapper.children).forEach((spool: HTMLButtonElement) => {
+    const name = spool.getAttribute('data-spoolname')
+    let color
+    if (name[0] === 'A') {
+      color = colorA
+    } else {
+      color = colorB
+    }
+    spool.setAttribute('data-color', color)
+    spool.style.backgroundColor = color
+    spool.style.borderColor = color
+  })
+
+  updateColors()
+  setURL()
 }
 
 export default function initUI () {
@@ -174,9 +254,16 @@ export default function initUI () {
   updateColorSelectors()
   document.querySelectorAll('.color-selector-button').forEach(e => e.classList.toggle('current', e.getAttribute('data-color') === colors.current))
 
-  for (let i = 0; i < state.wiresCount; i++) {
-    createSpoolButton(i, 'A', i % 2 === 0 ? 1 : 0.7)
-    createSpoolButton(i, 'B', i % 2 === 0 ? 0.7 : 1)
+  if (data.spools) {
+    for (let i = 0; i < state.wiresCount; i++) {
+      createSpoolButton(i, 'A', i % 2 === 0 ? 1 : 0.7, '#' + data.spools.split(',')[2 * i])
+      createSpoolButton(i, 'B', i % 2 === 0 ? 0.7 : 1, '#' + data.spools.split(',')[2 * i + 1])
+    }
+  } else {
+    for (let i = 0; i < state.wiresCount; i++) {
+      createSpoolButton(i, 'A', i % 2 === 0 ? 1 : 0.7, colors.current)
+      createSpoolButton(i, 'B', i % 2 === 0 ? 0.7 : 1, colors.current)
+    }
   }
 
   createSpoolsLinks()
@@ -189,6 +276,8 @@ export default function initUI () {
 
   document.getElementById('open-palette-popup').addEventListener('click', () => { openPalettePopup() })
   document.getElementById('randomize').addEventListener('click', () => { randomizeFromPalette() })
+  document.getElementById('euclid').addEventListener('click', () => { euclidFromPalette() })
+  document.getElementById('lines').addEventListener('click', () => { linesFromPalette() })
 
   document.querySelectorAll('button.palette-add').forEach(btn => {
     btn.addEventListener('click', () => {
